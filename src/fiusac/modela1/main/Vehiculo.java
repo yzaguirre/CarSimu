@@ -22,18 +22,23 @@ public class Vehiculo implements Dibujable{
 	/**Peso en kg**/
 	private int peso;
 	/**velocidad maxima en km/h**/
-	private int velmax;
+	public double velmax;
 	/**aceleracion en segundos de 0 a 100 km/h y 0 a 200 km/h, respectivamente**/
-	private float t0100, t0200;
+	private double t0100, t0200;
 	
 	/**Numero de cilindros**/
 	private int cilindros;
 	/**Desplazamiento en litros**/
-	private float desplazamiento;
+	private double desplazamiento;
 	/**Caballos de fuerza HP**/
 	private int hp;
 	/**Revoluciones por minuto**/
 	private int rpm;
+	
+	public double v0, vf, t, x0, x, axCTE;
+	public double finishTime, velmaxTime;
+	public Boolean isDone;
+	
 	
 	/**
 	 * @param vehiculoImage
@@ -49,29 +54,61 @@ public class Vehiculo implements Dibujable{
 	 * @param rpm
 	 */
 	public Vehiculo(String vehiculoImage, String marca, String modelo,
-			int peso, int velmax, float t0100, float t0200, int cilindros,
-			float desplazamiento, int hp, int rpm) {
+			int peso, double velmax, double t0100, double t0200, int cilindros,
+			double desplazamiento, int hp, int rpm) {
 		this(vehiculoImage);
 		this.marca = marca;
 		this.modelo = modelo;
 		this.peso = peso;
-		this.velmax = velmax;
+		this.velmax = toMS(velmax);
 		this.t0100 = t0100;
 		this.t0200 = t0200;
+		  this.v0 = 0;
+		  this.vf = toMS(200); // conversion a m/s
+		  this.t = t0200;
+		  this.x0 = 0;
+		  this.x = calculateXnoA(0, this.v0, this.vf, this.t);
+		  this.axCTE = calculateAx(this.vf, this.v0, this.x0, this.x);
+		  System.out.println("vf: " + this.vf + "  x" + this.x + "  axCTE: " + this.axCTE);
 		this.cilindros = cilindros;
 		this.desplazamiento = desplazamiento;
 		this.hp = hp;
 		this.rpm = rpm;
-		this.posicion = posicion;
 		this.posicion = new Point(10, 0);
+	}
+	public void reset(){
+		this.v0 = this.vf = this.x = this.x0 = this.t = 0D;
+		isDone = Boolean.FALSE;
 	}
 	private BufferedImage vehiculoImage;
 	private Point posicion;
 	/**
-	 * 
+	 * @param imagenVehiculo
 	 */
 	private Vehiculo(String imagenVehiculo) {
 		vehiculoImage = ic.getSprite(imagenVehiculo);
+		isDone = Boolean.FALSE;
+	}
+	public static double toMS(double KMH){
+		return KMH * 1000D / 60D;
+	}
+	public static double calculateXnoA(double x0, double v0, double vf, double t){
+		// System.out.println(vf + " * " + t + " / 2");
+		return x0 + (v0 + vf) * t / 2D;
+	}
+	public static double calculateAx(double vf, double v0, double x0, double x){
+		return (Math.pow(vf, 2D) + Math.pow(v0, 2D)) / (2D * (x - x0));
+	}
+	public static double calculateX(double x0, double vox, double tdelta, double axcte){
+		// x = x0 + vox * tdelta + 0.5 ax * tdelta ^ 2
+		return x0 + vox * tdelta + 0.5D * axcte * Math.pow(tdelta, 2D);
+	}
+	public static double calculateVf(double vox, double tdelta, double axcte){
+		// vx = vox + ax * t
+		return vox + axcte * tdelta;
+	}
+	public void traslado(int longitudPista){
+		this.posicion.x = (int) this.x * 800 / longitudPista;
 	}
 	public void avanzar(){
 		
@@ -84,6 +121,9 @@ public class Vehiculo implements Dibujable{
 	}
 	public void setY(int y){
 		this.posicion.y = y;
+	}
+	public void setXY(int x, int y){
+		this.posicion.setLocation(x, y);
 	}
 	public int obtenerX(){
         return posicion.x;
