@@ -18,7 +18,7 @@ import fiusac.modela1.dibujo.Dibujable;
  *
  */
 public class Vehiculo implements Dibujable{
-	private String marca, modelo;
+	public String marca, modelo;
 	/**Peso en kg**/
 	private int peso;
 	/**velocidad maxima en km/h**/
@@ -35,7 +35,7 @@ public class Vehiculo implements Dibujable{
 	/**Revoluciones por minuto**/
 	private int rpm;
 	
-	public double v0, vf, t, x0, x, axCTE;
+	public double vf, t, x, axCTE;
 	public double finishTime, velmaxTime;
 	public Boolean isDone;
 	
@@ -63,13 +63,10 @@ public class Vehiculo implements Dibujable{
 		this.velmax = toMS(velmax);
 		this.t0100 = t0100;
 		this.t0200 = t0200;
-		  this.v0 = 0;
 		  this.vf = toMS(200); // conversion a m/s
 		  this.t = t0200;
-		  this.x0 = 0;
-		  this.x = calculateXnoA(0, this.v0, this.vf, this.t);
-		  this.axCTE = calculateAx(this.vf, this.v0, this.x0, this.x);
-		  System.out.println("vf: " + this.vf + "  x" + this.x + "  axCTE: " + this.axCTE);
+		this.axCTE = calculateAx(this.vf, this.t);
+		  System.out.println("vf: " + this.vf + "  axCTE: " + this.axCTE);
 		this.cilindros = cilindros;
 		this.desplazamiento = desplazamiento;
 		this.hp = hp;
@@ -77,7 +74,7 @@ public class Vehiculo implements Dibujable{
 		this.posicion = new Point(10, 0);
 	}
 	public void reset(){
-		this.v0 = this.vf = this.x = this.x0 = this.t = 0D;
+		this.vf = this.x = this.t = 0D;
 		isDone = Boolean.FALSE;
 	}
 	private BufferedImage vehiculoImage;
@@ -90,25 +87,29 @@ public class Vehiculo implements Dibujable{
 		isDone = Boolean.FALSE;
 	}
 	public static double toMS(double KMH){
-		return KMH * 1000D / 60D;
+		return KMH * 1000D / 3600D;
 	}
-	public static double calculateXnoA(double x0, double v0, double vf, double t){
-		// System.out.println(vf + " * " + t + " / 2");
-		return x0 + (v0 + vf) * t / 2D;
+
+	public static double calculateAx(double vf, double t){
+		return vf / t;
 	}
-	public static double calculateAx(double vf, double v0, double x0, double x){
-		return (Math.pow(vf, 2D) + Math.pow(v0, 2D)) / (2D * (x - x0));
+	/*
+	 * @return Posicion en metros
+	 * */
+	public static double calculateX(double t, double vf){
+		// 0.5 ax * t ^ 2
+		return vf * t;
 	}
-	public static double calculateX(double x0, double vox, double tdelta, double axcte){
-		// x = x0 + vox * tdelta + 0.5 ax * tdelta ^ 2
-		return x0 + vox * tdelta + 0.5D * axcte * Math.pow(tdelta, 2D);
+	/**
+	 * @return Velocidad en m/s
+	 * */
+	public static double calculateVf(double t, double axcte){
+		// vx = ax * t
+		return axcte * t;
 	}
-	public static double calculateVf(double vox, double tdelta, double axcte){
-		// vx = vox + ax * t
-		return vox + axcte * tdelta;
-	}
+	
 	public void traslado(int longitudPista){
-		this.posicion.x = (int) this.x * 800 / longitudPista;
+		this.posicion.x = (int) this.x * (3000 / longitudPista);
 	}
 	public void avanzar(){
 		

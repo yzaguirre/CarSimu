@@ -51,7 +51,7 @@ public class Pista extends JComponent {
 		};
 	}
 	public Pista() {
-		super.setSize(800, 650);
+		super.setSize(3000, 650);
 		alVehiculos = new ArrayList<>(4);
 	}
 	/**
@@ -92,20 +92,22 @@ public class Pista extends JComponent {
 							continue for_v; //no molestarse con este "v"
 						}
 						// calcular nuevas variables para Vehiculo "v"
-						if (v.vf <= v.velmax) { // calcular su velocidad
-							v.vf = Vehiculo.calculateVf(0, t, v.axCTE);
+						if (v.vf < v.velmax) { // calcular su velocidad
+							v.vf = Vehiculo.calculateVf(t, v.axCTE);
 							v.velmaxTime = t;
 						}
-						v.x = Vehiculo.calculateX(0, 0, t, v.axCTE); // calcular su posicion
+						v.x = Vehiculo.calculateX(t, v.vf); // calcular su posicion
+						/*if (v.marca == "Porche")
+							System.out.println(v.vf);*/
 						if (v.x > Pista.this.longitudPista) v.isDone = Boolean.TRUE; // alcanzo la longitud de la pista
 						v.traslado(Pista.this.longitudPista); // trasladar coordenadas de metros a pixeles
 					}
 					Pista.this.repaint();
-					/*try {
-						Thread.sleep(300); // duermase 1 segundo
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}*/
+//					try {
+//						Thread.sleep(500); // duermase 1 segundo
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
 					// epoch = epochNow; // comentar para obtener tiempo total transcurrido
 					epochNow = System.currentTimeMillis();
 				}
@@ -126,7 +128,7 @@ public class Pista extends JComponent {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		
-		BufferedImage biBuff = new BufferedImage(800, 600, BufferedImage.TRANSLUCENT);
+		BufferedImage biBuff = new BufferedImage(3000, 600, BufferedImage.TRANSLUCENT);
 		
 		Graphics2D g2dBuff = biBuff.createGraphics();
 		g2dBuff.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // antialiasing
@@ -143,12 +145,12 @@ public class Pista extends JComponent {
 	}
 	public static void main(String[] args){
 		JFrame jf = new JFrame("Standalone JFrame");
-		jf.setBounds(150, 50, 800, 700);
+		jf.setBounds(150, 50, 3000, 700);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setLayout(null);
 		
 		Pista p = new Pista();
-		p.inicializar("img/fondo.png", 1500, new int[] {1,1,1,1});
+		p.inicializar("img/fondo.png", 500, new int[] {1,1,1,1});
 		
 		jf.add(p);
 		jf.setVisible(true);
