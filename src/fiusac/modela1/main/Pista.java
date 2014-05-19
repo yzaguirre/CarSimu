@@ -5,6 +5,7 @@ package fiusac.modela1.main;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -32,11 +33,18 @@ public class Pista extends JComponent {
 	
 	private BufferedImage biFondo;
 	private String dirFondo;
+	/**Numero de vehiculos a considerar en la simulacion presente**/
 	private int totalCars;
 	private static final Vehiculo[] vehiculos;
+	/**Posicion Y de cada carril para vehiculo**/
 	private static final int[] ys;
+	/**Posicion X, Y para caja de estadisticas**/
+	private static final int[][] xys;
 	private ArrayList<Vehiculo> alVehiculos;
-	private int longitudPista;
+	/**Longitud de la pista**/
+	private int longitudPista, longitudMedia;
+	/**Tiempo transcurrido**/
+	private double lapsedTime;
 	static {
 		dirStats = "img/stats.png";
 		biStats = ic.getSprite(dirStats);
@@ -49,9 +57,12 @@ public class Pista extends JComponent {
 		ys = new int[]{
 				40,110,230,310
 		};
+		xys = new int[][]{
+				{110,410},{340,410},{110,500},{340,500}
+		};
 	}
 	public Pista() {
-		super.setSize(3000, 650);
+		super.setSize(1600, 650);
 		alVehiculos = new ArrayList<>(4);
 	}
 	/**
@@ -63,14 +74,21 @@ public class Pista extends JComponent {
 		this.dirFondo = dirFondo;
 		this.biFondo = ic.getSprite(dirFondo);
 		this.longitudPista = longitudPista;
+		this.longitudMedia = longitudPista / 2;
+		this.lapsedTime = 0D;
 		alVehiculos.clear();
 		totalCars = 0;
+		int [] xypair;
+		int carnum = 0;
 		for(int i=0; i < 4; i++){
 			Vehiculo v = vehiculos[i];
 			if (carros[i] == 1) { // usuario ha elegido este carrito
-				v.setXY(10, ys[totalCars++]); // reiniciar coordenadas de v
+				carnum = totalCars++;
+				v.setXY(0, ys[carnum]); // reiniciar coordenadas de v
+				xypair = xys[carnum];
+				v.setStatXY(xypair[0], xypair[1]);
 				v.reset();
-				alVehiculos.add(v); // incluir v a lista de vehiculos a trabajar
+				alVehiculos.add(v); // incluir v a lista de vehiculos a considerar
 			} else {
 				v.isDone = Boolean.TRUE; // autos a no considerar
 			}
@@ -79,39 +97,50 @@ public class Pista extends JComponent {
 	public Thread start (){
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				double epoch0, epoch, epochNow;
-				epoch0 = epoch = epochNow = System.currentTimeMillis();
+				double t0, tNow;
+				t0 = tNow = System.currentTimeMillis();
+				int conteo_iteracion = 0;
 				Vehiculo v1 = vehiculos[0], v2 = vehiculos[1], v3 = vehiculos[2], v4 = vehiculos[3];
-				while_v: while (!(v1.isDone && v2.isDone && v3.isDone && v4.isDone)){ // mientras ningun vehiculo ha concluido
+				while (!(v1.isDone && v2.isDone && v3.isDone && v4.isDone)){ // mientras ningun vehiculo ha concluido
 					// double tdelta = (epochNow - epoch) / 1000D;
-					double t = (epochNow - epoch0) / 1000D;
+					double t = (tNow - t0) / 1000D;
 					// System.out.println("Tiempo transcurrido: " + t);
 					for_v: for (Vehiculo v: alVehiculos){
 						if (v.isDone) {
-							v.finishTime = t;
 							continue for_v; //no molestarse con este "v"
 						}
+						v.t = t; // tiempo actual del vehiculo
 						// calcular nuevas variables para Vehiculo "v"
 						if (v.vf < v.velmax) { // calcular su velocidad
-							v.vf = Vehiculo.calculateVf(t, v.axCTE);
-							v.velmaxTime = t;
+							v.vf = Vehiculo.calculateVf(t, v.axCTE); // calcular velocidad
+							v.x = v.xvelmax = Vehiculo.calculateX(t, v.vf); // calcular su posicion, y guardar posicion al momento de alcanzar velmax
+							v.tvelmax = t; // tiempo al momento de alcanzar velocidad maxima
+						} else {
+							v.x = Vehiculo.calculateX(t, v.vf); // calcular su posicion							
 						}
-						v.x = Vehiculo.calculateX(t, v.vf); // calcular su posicion
 						/*if (v.marca == "Porche")
 							System.out.println(v.vf);*/
 						if (v.x > Pista.this.longitudPista) v.isDone = Boolean.TRUE; // alcanzo la longitud de la pista
+						if (conteo_iteracion++ % 25 == 0){
+							v.puntosxvt.add(new Punto(v.x, v.vf, v.t));
+						}
 						v.traslado(Pista.this.longitudPista); // trasladar coordenadas de metros a pixeles
 					}
+					Pista.this.lapsedTime = t; // tiempo total transcurrido
 					Pista.this.repaint();
-//					try {
-//						Thread.sleep(500); // duermase 1 segundo
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-					// epoch = epochNow; // comentar para obtener tiempo total transcurrido
-					epochNow = System.currentTimeMillis();
+					tNow = System.currentTimeMillis();
+					try {
+						Thread.sleep(25);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				// finaliza hilo
+				// mostrarResumenTabular()
+				// mostrar graficas
+				PanelGrafico pg = new PanelGrafico(Pista.this.alVehiculos);
+				pg.mostrar();
 			}
 		});
 		return t;
@@ -128,13 +157,31 @@ public class Pista extends JComponent {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		
-		BufferedImage biBuff = new BufferedImage(3000, 600, BufferedImage.TRANSLUCENT);
+		BufferedImage biBuff = new BufferedImage(1600, 600, BufferedImage.TRANSLUCENT);
 		
 		Graphics2D g2dBuff = biBuff.createGraphics();
 		g2dBuff.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // antialiasing
 		
 		g2dBuff.drawImage(biFondo, 0, 0, this); // dibujar fondo
 		g2dBuff.drawImage(biStats, 0, 400, this); // dibujar fondo
+		// dibujar texto color rojo
+		g2dBuff.setColor(Color.RED);
+		g2dBuff.drawString("0 m", 10, 210);
+		g2dBuff.drawString(String.format("%d m", longitudMedia), 800, 210);
+		g2dBuff.drawString(String.format("%d m", longitudPista), 1550, 210);
+		g2dBuff.drawString("1", 10, 60);
+		g2dBuff.drawString("2", 10, 120);
+		g2dBuff.drawString("3", 10, 250);
+		g2dBuff.drawString("4", 10, 330);
+		// dibujar texto color negro
+		g2dBuff.setColor(Color.BLACK);
+		// offset x de 10, y de 15
+		g2dBuff.drawString("1", 120, 425);
+		g2dBuff.drawString("2", 350, 425);
+		g2dBuff.drawString("3", 120, 515);
+		g2dBuff.drawString("4", 350, 515);
+		// dibujar tiempo transcurrido
+        g2dBuff.drawString(String.format("Tiempo transcurrido: %.3f s", this.lapsedTime), 600, 410);
 		
 		// dibujar carritos
 		for(Vehiculo v : alVehiculos){
@@ -145,12 +192,12 @@ public class Pista extends JComponent {
 	}
 	public static void main(String[] args){
 		JFrame jf = new JFrame("Standalone JFrame");
-		jf.setBounds(150, 50, 3000, 700);
+		jf.setBounds(150, 50, 1600, 700);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setLayout(null);
 		
 		Pista p = new Pista();
-		p.inicializar("img/fondo.png", 500, new int[] {1,1,1,1});
+		p.inicializar("img/fondo.png", 1500, new int[] {1,0,0,0});
 		
 		jf.add(p);
 		jf.setVisible(true);
