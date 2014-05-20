@@ -118,8 +118,14 @@ public class Vehiculo implements Dibujable{
 	/*
 	 * @return Posicion en metros
 	 * */
-	public static double calculateX(double t, double vf){
-		return vf * t;
+	public static double calculateX(double x0, double t, double vf){
+		return x0 + vf * t;
+	}
+	/*
+	 * @return Posicion en metros
+	 * */
+	public static double calculateXconACTE(double t, double acte){
+		return 0.5D * acte * Math.pow(t, 2D);
 	}
 	/**
 	 * @return Velocidad en m/s
@@ -132,7 +138,9 @@ public class Vehiculo implements Dibujable{
 	 * @param longitudPista Distancia en metros
 	 **/
 	public void traslado(int longitudPista){
-		this.posicion.x = (int) this.x * (1600 / longitudPista);
+		this.posicion.x = (int) this.x * 1540 / longitudPista;
+		// if (marca == "Porche")
+		//	System.out.println("coordenada X: " + posicion.x + ", longitud pista: " + longitudPista);
 	}
 	public boolean isDone(){
 		return Boolean.FALSE;
@@ -161,7 +169,7 @@ public class Vehiculo implements Dibujable{
 			// rowData[0][i] = v.marca;
 			columnNames[i] = v.marca;
 			rowData[0][i] = String.format("%.5f m/s^2", v.axCTE);
-			rowData[1][i] = String.format("%.5f m", v.x200);
+			rowData[1][i] = (longitudPista < v.x200)?"N/A":String.format("%.5f m", v.x200);
 			rowData[2][i] = String.format("%.5f m/s", v.vf);
 			rowData[3][i] = (v.vf < v.velmax) ? "N/A" : String.format("%.5f s", v.tvelmax); // puede no lograrlo
 			rowData[4][i] = (v.vf < v.velmax) ? "N/A" : String.format("%.5f m", v.xvelmax); // puede no lograrlo

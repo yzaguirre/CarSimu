@@ -49,10 +49,13 @@ public class Pista extends JComponent {
 		dirStats = "img/stats.png";
 		biStats = ic.getSprite(dirStats);
 		vehiculos = new Vehiculo[]{
+				// String vehiculoImage, String marca, String modelo,
+				// int peso, double velmax, double t0100, double t0200, int cilindros,
+				// double desplazamiento, int hp, int rpm
 				new Vehiculo("img/cayenne.jpg", "Porche", "Cayenne 2013", 2105, 230D, 7.8D, 17.16D, 6, 3.6D, 296, 6300),
 				new Vehiculo("img/nissan.jpg", "Nissan", "350z 2010", 1537, 250D, 5.7D, 12.54D, 6, 3.5f, 309, 6800),
-				new Vehiculo("img/vw.png", "VW", "Beetle Cabrio", 1530, 221D, 7.6D, 16.72D, 4, 2.0D, 197, 5100),
-				new Vehiculo("img/peugeot.png", "Peugeot", "207 2011", 1342, 192D, 11.2D, 24.64D, 4, 2.0D, 118, 6000)
+				new Vehiculo("img/peugeot.png", "Peugeot", "207 2011", 1342, 208D, 8.6D, 18.92D, 4, 2.0D, 118, 6000),
+				new Vehiculo("img/vw.png", "VW", "Beetle Cabrio", 1530, 221D, 7.6D, 16.72D, 4, 2.0D, 197, 5100)
 		};
 		ys = new int[]{
 				40,110,230,310
@@ -103,7 +106,9 @@ public class Pista extends JComponent {
 				Vehiculo v1 = vehiculos[0], v2 = vehiculos[1], v3 = vehiculos[2], v4 = vehiculos[3];
 				while (!(v1.isDone && v2.isDone && v3.isDone && v4.isDone)){ // mientras ningun vehiculo ha concluido
 					// double tdelta = (epochNow - epoch) / 1000D;
-					double t = (tNow - t0) / 1000D;
+					double t = (tNow - t0) / 1000D;					
+					
+					
 					// System.out.println("Tiempo transcurrido: " + t);
 					for_v: for (Vehiculo v: alVehiculos){
 						if (v.isDone) {
@@ -113,10 +118,11 @@ public class Pista extends JComponent {
 						// calcular nuevas variables para Vehiculo "v"
 						if (v.vf < v.velmax) { // calcular su velocidad
 							v.vf = Vehiculo.calculateVf(t, v.axCTE); // calcular velocidad
-							v.x = v.xvelmax = Vehiculo.calculateX(t, v.vf); // calcular su posicion, y guardar posicion al momento de alcanzar velmax
+							v.x = v.xvelmax = Vehiculo.calculateXconACTE(t, v.axCTE); // calcular su posicion, y guardar posicion al momento de alcanzar velmax
 							v.tvelmax = t; // tiempo al momento de alcanzar velocidad maxima
 						} else {
-							v.x = Vehiculo.calculateX(t, v.vf); // calcular su posicion							
+							// System.out.println("tiempo " + (t-v.tvelmax) + ", s0 " + v.xvelmax);
+							v.x = Vehiculo.calculateX(v.xvelmax,t-v.tvelmax,v.vf); // calcular su posicion							
 						}
 						/*if (v.marca == "Porche")
 							System.out.println(v.vf);*/
@@ -137,10 +143,9 @@ public class Pista extends JComponent {
 					}
 				}
 				// finaliza hilo
-				// mostrarResumenTabular()
 				// mostrar graficas
-				// PanelGrafico pg = new PanelGrafico(Pista.this.alVehiculos);
-				// pg.mostrar();
+				PanelGrafico pg = new PanelGrafico("Graficas", Pista.this.alVehiculos);
+				pg.mostrar();
 				TablaResumen tr = new TablaResumen("Resumen", Vehiculo.getTableData(alVehiculos, longitudPista));
 				tr.mostrar();
 			}
@@ -199,7 +204,7 @@ public class Pista extends JComponent {
 		jf.setLayout(null);
 		
 		Pista p = new Pista();
-		p.inicializar("img/fondo.png", 1500, new int[] {1,1,1,1});
+		p.inicializar("img/fondo.png", 500, new int[] {1,1,1,1});
 		
 		jf.add(p);
 		jf.setVisible(true);

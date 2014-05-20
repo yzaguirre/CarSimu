@@ -42,8 +42,8 @@ public class PanelGrafico extends JFrame{
 	/**
 	 * @param vehiculos
 	 */
-	public PanelGrafico(ArrayList<Vehiculo> vehiculos) {
-		super("Graficas");
+	public PanelGrafico(String title, ArrayList<Vehiculo> vehiculos) {
+		super(title);
 		this.vehiculos = vehiculos;
 		preparar();
 	}
