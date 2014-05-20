@@ -610,7 +610,7 @@ public class menuSeleccion extends javax.swing.JFrame {
             return;
         }
         // Llamada a procedimiento
-        JFrame jf = new JFrame("Standalone JFrame");
+        JFrame jf = new JFrame("Simulacion");
 		jf.setBounds(150, 50, 1600, 700);
 		jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		jf.setLayout(null);

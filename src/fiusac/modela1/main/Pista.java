@@ -144,7 +144,7 @@ public class Pista extends JComponent {
 				}
 				// finaliza hilo
 				// mostrar graficas
-				PanelGrafico pg = new PanelGrafico("Graficas", Pista.this.alVehiculos);
+				PanelGrafico pg = new PanelGrafico("Graficas", Pista.this.alVehiculos, Pista.this.lapsedTime, Pista.this.longitudPista);
 				pg.mostrar();
 				TablaResumen tr = new TablaResumen("Resumen", Vehiculo.getTableData(alVehiculos, longitudPista));
 				tr.mostrar();
@@ -197,7 +197,7 @@ public class Pista extends JComponent {
 		
 		g2d.drawImage(biBuff, 0, 0, this); // imprimir el dibujo al JComponent
 	}
-	public static void main(String[] args){
+	/*public static void main(String[] args){
 		JFrame jf = new JFrame("Standalone JFrame");
 		jf.setBounds(150, 50, 1600, 700);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -211,5 +211,5 @@ public class Pista extends JComponent {
 		// p.start();
 		Thread t = p.start();
 		t.start();
-	}
+	}*/
 }
