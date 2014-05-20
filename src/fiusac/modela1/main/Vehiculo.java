@@ -9,7 +9,9 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
 
+import javax.swing.JTable;
 import javax.swing.text.Position;
 
 import fiusac.modela1.dibujo.Dibujable;
@@ -140,6 +142,32 @@ public class Vehiculo implements Dibujable{
 	}
 	public void setStatXY(int x, int y){
 		this.statBox.setLocation(x, y);
+	}
+	public static JTable getTableData(ArrayList<Vehiculo> vehiculos, int longitudPista){
+		int size = vehiculos.size();
+		String [][] rowData = new String [6][size + 1];
+		String [] columnNames = new String[size + 1];
+		columnNames[0] = "Datos";
+		rowData[0][0] = "Aceleracion constante";
+		rowData[1][0] = "Distancia a la que se alcanzaron los 200 km/h";
+		rowData[2][0] = "Velocidad final alcanzada";
+		rowData[3][0] = "Tiempo en el que se alcanzó la velocidad máxima";
+		rowData[4][0] = "Distancia a la que se alcanzó la velocidad máxima";
+		rowData[5][0] = String.format("Tiempo en que completa el recorrido (%d m)", longitudPista);
+		Iterator<Vehiculo> it = vehiculos.iterator();
+		for (int i = 1; i <= size; i ++){ // iterar por vehiculo / columna
+			Vehiculo v = it.next();
+			// recorrero por fila
+			// rowData[0][i] = v.marca;
+			columnNames[i] = v.marca;
+			rowData[0][i] = String.format("%.5f m/s^2", v.axCTE);
+			rowData[1][i] = String.format("%.5f m", v.x200);
+			rowData[2][i] = String.format("%.5f m/s", v.vf);
+			rowData[3][i] = (v.vf < v.velmax) ? "N/A" : String.format("%.5f s", v.tvelmax); // puede no lograrlo
+			rowData[4][i] = (v.vf < v.velmax) ? "N/A" : String.format("%.5f m", v.xvelmax); // puede no lograrlo
+			rowData[5][i] = String.format("%.5f s", v.t);
+		}
+		return new JTable(rowData, columnNames);
 	}
 	@Override
 	public void dibujar(Graphics2D g2d) {

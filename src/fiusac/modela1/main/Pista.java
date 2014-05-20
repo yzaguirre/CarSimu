@@ -122,7 +122,7 @@ public class Pista extends JComponent {
 							System.out.println(v.vf);*/
 						if (v.x > Pista.this.longitudPista) v.isDone = Boolean.TRUE; // alcanzo la longitud de la pista
 						if (conteo_iteracion++ % 25 == 0){
-							v.puntosxvt.add(new Punto(v.x, v.vf, v.t));
+							v.puntosxvt.add(new Punto(v.x, v.vf, v.t)); // puntos a graficar
 						}
 						v.traslado(Pista.this.longitudPista); // trasladar coordenadas de metros a pixeles
 					}
@@ -139,8 +139,10 @@ public class Pista extends JComponent {
 				// finaliza hilo
 				// mostrarResumenTabular()
 				// mostrar graficas
-				PanelGrafico pg = new PanelGrafico(Pista.this.alVehiculos);
-				pg.mostrar();
+				// PanelGrafico pg = new PanelGrafico(Pista.this.alVehiculos);
+				// pg.mostrar();
+				TablaResumen tr = new TablaResumen("Resumen", Vehiculo.getTableData(alVehiculos, longitudPista));
+				tr.mostrar();
 			}
 		});
 		return t;
@@ -197,7 +199,7 @@ public class Pista extends JComponent {
 		jf.setLayout(null);
 		
 		Pista p = new Pista();
-		p.inicializar("img/fondo.png", 1500, new int[] {1,0,0,0});
+		p.inicializar("img/fondo.png", 1500, new int[] {1,1,1,1});
 		
 		jf.add(p);
 		jf.setVisible(true);
