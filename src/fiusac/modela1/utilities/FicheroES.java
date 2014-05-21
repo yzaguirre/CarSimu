@@ -1,6 +1,3 @@
-/**
- * 
- */
 package fiusac.modela1.utilities;
 
 /**

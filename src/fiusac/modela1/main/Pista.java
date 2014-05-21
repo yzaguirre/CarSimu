@@ -109,6 +109,7 @@ public class Pista extends JComponent {
 				while (!(v1.isDone && v2.isDone && v3.isDone && v4.isDone)){ // mientras ningun vehiculo ha concluido
 					double t = (tNow - t0) / 1000D; // obtener los segundos transcurridos desde el inicio de la simulacion
 					// System.out.println("Tiempo transcurrido: " + t);
+					conteo_iteracion++;
 					for_v: for (Vehiculo v: alVehiculos){
 						if (v.isDone) {
 							continue for_v; //no molestarse con este "v"
@@ -123,7 +124,7 @@ public class Pista extends JComponent {
 							v.x = Vehiculo.calculateX(v.xvelmax, t - v.tvelmax, v.vf); // calcular su posicion dado: distancia inicial, tiempo transcurrido, velocidad constante actual
 						}
 						if (v.x > Pista.this.longitudPista) v.isDone = Boolean.TRUE; // alcanzo la longitud de la pista
-						if (conteo_iteracion++ % 25 == 0){ // tomar un punto a graficar por cada 25 iteraciones
+						if (conteo_iteracion % 50 == 0){ // tomar un punto a graficar por cada 25 iteraciones
 							v.puntosxvt.add(new Punto(v.x, v.vf, v.t)); // punto a graficar
 						}
 						v.traslado(Pista.this.longitudPista); // trasladar coordenadas de metros a pixeles
