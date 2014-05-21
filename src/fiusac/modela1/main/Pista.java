@@ -47,8 +47,8 @@ public class Pista extends JComponent {
 	private double lapsedTime;
 	static {
 		vehiculos = new Vehiculo[]{
-				new Vehiculo("img/cayenne.jpg", "Porche", "Cayenne 2013", 2105, 230D, 7.8D, 17.16D, 6, 3.6D, 296, 6300),
-				new Vehiculo("img/nissan.jpg", "Nissan", "350z 2010", 1537, 250D, 5.7D, 12.54D, 6, 3.5f, 309, 6800),
+				new Vehiculo("img/cayenne.png", "Porche", "Cayenne 2013", 2105, 230D, 7.8D, 17.16D, 6, 3.6D, 296, 6300),
+				new Vehiculo("img/nissan.png", "Nissan", "350z 2010", 1537, 250D, 5.7D, 12.54D, 6, 3.5f, 309, 6800),
 				new Vehiculo("img/peugeot.png", "Peugeot", "207 2011", 1342, 208D, 8.6D, 18.92D, 4, 2.0D, 118, 6000),
 				new Vehiculo("img/vw.png", "VW", "Beetle Cabrio", 1530, 221D, 7.6D, 16.72D, 4, 2.0D, 197, 5100)
 		};
