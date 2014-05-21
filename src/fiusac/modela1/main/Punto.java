@@ -1,17 +1,15 @@
 package fiusac.modela1.main;
-
+/**
+ * Representa un estado de velocidad, desplazamiento y tiempo transcurrido de un vehiculo
+ * **/
 public class Punto {
-	/**Puede ser
-	 * Velocidad y tiempo
-	 * o
-	 * Distancia y tiempo
-	 * **/
+	
 	public double x, v, t;
 	
 	/**
-	 * @param x
-	 * @param v
-	 * @param t
+	 * @param x desplazamiento
+	 * @param v velocidad
+	 * @param t tiempo
 	 */
 	public Punto(double x, double v, double t) {
 		this.x = x;

@@ -1,4 +1,4 @@
-package fiusac.modela1.graficas;
+package fiusac.modela1.main;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,13 +43,24 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import fiusac.modela1.main.Punto;
 import fiusac.modela1.main.Vehiculo;
+/**
+ * Contiene graficos resultado de la simulacion
+ */
 public class PanelGrafico extends JFrame{
+	/**Vehiculos a extrar datos**/
 	private ArrayList<Vehiculo> vehiculos;
+	/**Componente a incluir un JPanel**/
 	private JScrollPane jsp;
+	/**Componente a incluir las graficas jfreechart**/
 	private JPanel jp;
+	/**Delimitadores dominio y rango de la grafica en terminos tiempo y desplazamiento**/
 	private int tlimit, xlimit;
 	/**
-	 * @param vehiculos
+	 * Constructor
+	 * @param title Titulo de la ventana
+	 * @apram vehiculos Lista de vehiculos a extrar datos
+	 * @param tlimit dominio de la grafica en terminos de tiempo
+	 * @param xlimit rango de la grafica en terminos de desplazamiento
 	 */
 	public PanelGrafico(String title, ArrayList<Vehiculo> vehiculos, double tlimit, int xlimit) {
 		super(title);
@@ -60,7 +71,9 @@ public class PanelGrafico extends JFrame{
 		this.xlimit = xlimit;
 		preparar();
 	}
-	
+	/**
+	 * Muestra la ventana
+	 **/
 	public void mostrar() {
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -69,6 +82,7 @@ public class PanelGrafico extends JFrame{
 		add(jsp, BorderLayout.CENTER);
         setVisible(true);
 	}
+	/**Itera por vehiculo para extraer datos**/
 	private void preparar(){
 		int i = 1;
 		for (Vehiculo v: this.vehiculos){
@@ -81,8 +95,8 @@ public class PanelGrafico extends JFrame{
 			String titleVT = v.marca + " _ " + v.modelo + " -- VELOCIDAD - TIEMPO";
 			String titleXT = v.marca + " _ " + v.modelo + " -- DESPLAZAMIENTO - TIEMPO";
 			
-			JFreeChart chartVT = createXYChart(datasetVT, titleVT, "Velocidad", "Tiempo", 		(int)v.velmax + 10);
-			JFreeChart chartXT = createXYChart(datasetXT, titleXT, "Desplazamiento", "Tiempo",	 xlimit + 10);
+			JFreeChart chartVT = createXYChart(datasetVT, titleVT, "Velocidad (m/s)", "Tiempo (s)", 		(int)v.velmax + 10);
+			JFreeChart chartXT = createXYChart(datasetXT, titleXT, "Desplazamiento (m)", "Tiempo (s)",	 xlimit + 10);
 			try {
 	            ChartUtilities.saveChartAsPNG(new File(titleVT + ".png"), chartVT, 500, 500);
 	            ChartUtilities.saveChartAsPNG(new File(titleXT + ".png"), chartXT, 500, 500);
@@ -100,23 +114,35 @@ public class PanelGrafico extends JFrame{
 	        i++;
 		}	
 	}
+	/**
+	 * Clasifica las muestras tomadas
+	 * @param puntosxvt Muestras que corresponde a un vehiculo
+	 * @param Datos recopilados
+	 * **/
 	private ArrayList<XYDataset> createData(ArrayList<Punto> puntosxvt) {
 		ArrayList<XYDataset> returnable = new ArrayList<>(2);
         XYSeriesCollection dataVT = new XYSeriesCollection();
         XYSeriesCollection dataXT = new XYSeriesCollection();
         returnable.add(dataVT);
         returnable.add(dataXT);
-        XYSeries seriesVT = new XYSeries("Velocidad"); // Velocidad - Tiempo
-        XYSeries seriesXT = new XYSeries("Desplazamiento"); // Distancia - Tiempo
+        XYSeries seriesVT = new XYSeries("Velocidad (m/s)"); // Velocidad - Tiempo
+        XYSeries seriesXT = new XYSeries("Desplazamiento (m)"); // Distancia - Tiempo
     	for(Punto punto: puntosxvt){
-    		seriesVT.add(punto.t, punto.v); // eje y eje x
-    		seriesXT.add(punto.t, punto.x); // eje y eje x
+    		seriesVT.add(punto.t, punto.v); // eje y, eje x
+    		seriesXT.add(punto.t, punto.x); // eje y, eje x
     	}
     	dataVT.addSeries(seriesVT);
     	dataXT.addSeries(seriesXT);
-        // return data;
         return returnable;
     }
+	/**
+	 * Crea el componente visible de una grafica
+	 * @param data Datos recopilados para la grafica
+	 * @param titulo Titulo de la grafica
+	 * @param yName Nombre del eje y
+	 * @param xName Nombre del eje x
+	 * @param limit Limite del Rango a mostrar
+	 * **/
 	private JFreeChart createXYChart(XYDataset data, String titulo, String yName, String xName, int limit) {
         JFreeChart chart =
                 ChartFactory.createXYLineChart(titulo, xName, yName,

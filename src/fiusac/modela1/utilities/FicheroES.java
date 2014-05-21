@@ -4,19 +4,12 @@
 package fiusac.modela1.utilities;
 
 /**
- * @author david
- *
+ * Facilita la lectura y escritura de ficheros
  */
 public class FicheroES {
+	/**Carga imagenes a memoria**/
 	public static final ImageCache ic;
 	static{
 		ic = new ImageCache();
 	}
-	/**
-	 * 
-	 */
-	public FicheroES() {
-		// TODO Auto-generated constructor stub
-	}
-
 }

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package fiusac.modela1.main;
 
 import static fiusac.modela1.utilities.FicheroES.ic;
@@ -12,26 +9,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.JTable;
-import javax.swing.text.Position;
-
-import fiusac.modela1.dibujo.Dibujable;
 
 /**
- * @author david
- *
+ * Representa un vehiculo
  */
-public class Vehiculo implements Dibujable{
+public class Vehiculo {
 	/**velocidad final de 200km/h en m/s**/
 	public static final double vel200;
 	static {
 		vel200 = toMS(200);
 	}
+	/**Marca y modelo**/
 	public String marca, modelo;
 	/**Peso en kg**/
 	private int peso;
-	/**velocidad maxima en ms/s**/
+	/**velocidad maxima en ms/s. Utilizado en simulacion**/
 	public double velmax;
-	/**aceleracion en segundos de 0 a 100 km/h y 0 a 200 km/h, respectivamente**/
+	/**aceleracion en segundos de 0 a 100 km/h y 0 a 200 km/h. Utilizado en simulacion**/
 	private double t0100, t0200;
 	/**Numero de cilindros**/
 	private int cilindros;
@@ -44,18 +38,22 @@ public class Vehiculo implements Dibujable{
 	/**
 	 * vf velocidad final (alcanza velmax si vf >= velmax)
 	 * t tiempo transcurrido y finish time
-	 * x distancia
+	 * x desplazamiento
 	 * axCTE aceleracion constante
 	 * **/
 	public double vf, t, x, axCTE;
-	/**Tiempo
-	 * distancia en alcanzar velocidad maxima
-	 * distancia en alcanzar velocidad final 200 km/h **/
+	/**Tiempo transcurrido al alcanzar velocidad maxima
+	 * Desplazamiento al alcanzar velocidad maxima
+	 * Desplazamiento al alcanzar velocidad final 200 km/h **/
 	public double tvelmax, xvelmax, x200;
-	/**True si el vehiculo ha terminado el recorrido o no es participe de simulacion (usuario no lo elegio)**/
+	/**True si el vehiculo ha terminado el recorrido o no es considerado en la simulacion (usuario no lo elegio)**/
 	public Boolean isDone;
 	/**Lista de puntos a graficar**/
 	public ArrayList<Punto> puntosxvt;
+	/**Imagen de autopista en memoria para el fondo del canvas**/
+	private BufferedImage vehiculoImage;
+	/**Posicion del vehiculo y posicion de caja de monitoreo**/
+	private Point posicion, statBox;
 	
 	/**
 	 * @param vehiculoImage
@@ -73,18 +71,18 @@ public class Vehiculo implements Dibujable{
 	public Vehiculo(String vehiculoImage, String marca, String modelo,
 			int peso, double velmax, double t0100, double t0200, int cilindros,
 			double desplazamiento, int hp, int rpm) {
-		this(vehiculoImage);
+		this.vehiculoImage = ic.getSprite(vehiculoImage);
+		this.isDone = Boolean.FALSE;
 		this.marca = marca;
 		this.modelo = modelo;
 		this.peso = peso;
 		this.velmax = toMS(velmax);
 		this.t0100 = t0100;
 		this.t0200 = t0200;
-		  this.vf = vel200; // conversion de km/h a m/s
+		  this.vf = vel200;
 		  this.t = t0200;
 		this.axCTE = calculateAx(this.vf, this.t);
 		this.x200 = 0.5D * this.vf * this.t; // precalculado
-		  // System.out.println("vel200: " + this.vf + "  axCTE: " + this.axCTE + " x200: " + this.x200);
 		this.cilindros = cilindros;
 		this.desplazamiento = desplazamiento;
 		this.hp = hp;
@@ -93,64 +91,85 @@ public class Vehiculo implements Dibujable{
 		this.statBox = new Point(0, 0);
 		this.puntosxvt = new ArrayList<>(30);
 	}
+	/**Eliminar valores anteriores**/
 	public void reset(){
 		this.vf = this.x = this.t = 0D;
 		this.puntosxvt.clear();
 		this.isDone = Boolean.FALSE;
 	}
-	private BufferedImage vehiculoImage;
-	/**Posicion del vehiculo y posicion de caja de monitoreo**/
-	private Point posicion, statBox;
 	/**
-	 * @param imagenVehiculo
-	 */
-	private Vehiculo(String imagenVehiculo) {
-		vehiculoImage = ic.getSprite(imagenVehiculo);
-		isDone = Boolean.FALSE;
-	}
+	 * Convierte velocidad de km/h a m/s
+	 * @param KMH velocidad en km/h 
+	 * @return velocidad en m/s
+	 * **/
 	public static double toMS(double KMH){
 		return KMH * 1000D / 3600D;
 	}
-
+	/**
+	 * Calculo de aceleracion
+	 * @param vf velocidad en m/s
+	 * @param t tiempo en s
+	 * @return aceleracion en m/s^2
+	 * */
 	public static double calculateAx(double vf, double t){
 		return vf / t;
 	}
 	/*
-	 * @return Posicion en metros
+	 * Calculo de desplazamiento con velocidad constante
+	 * @param x0 Desplazamiento inicial en m
+	 * @param t Tiempo transcurrido en s
+	 * @param vf Velocidad final en m/s
+	 * @return Desplazamiento en m
 	 * */
 	public static double calculateX(double x0, double t, double vf){
 		return x0 + vf * t;
 	}
 	/*
-	 * @return Posicion en metros
+	 * Calculo de desplazamiento con aceleracion constante
+	 * @param t Tiempo transcurrido en s
+	 * @param acte Aceleracion constante en m/s^2
+	 * @return Desplazamiento en m
 	 * */
 	public static double calculateXconACTE(double t, double acte){
 		return 0.5D * acte * Math.pow(t, 2D);
 	}
 	/**
-	 * @return Velocidad en m/s
+	 * Calculo de velocidad final en m/s
+	 * @param t Tiempo transcurrido en s
+	 * @param axcte Aceleracion constante en m/s^2
+	 * @return Velocidad final en m/s
 	 * */
 	public static double calculateVf(double t, double axcte){
-		// vx = ax * t
 		return axcte * t;
 	}
 	/**
-	 * @param longitudPista Distancia en metros
+	 * Convierte metros a posicion en pixel
+	 * @param longitudPista Distancia de pista en m
 	 **/
 	public void traslado(int longitudPista){
 		this.posicion.x = (int) this.x * 1540 / longitudPista;
-		// if (marca == "Porche")
-		//	System.out.println("coordenada X: " + posicion.x + ", longitud pista: " + longitudPista);
 	}
-	public boolean isDone(){
-		return Boolean.FALSE;
-	}
+	/**
+	 * Asigna posicion (x,y) al vehiculo
+	 * @param x Posicion x
+	 * @param y Posicion y
+	 * **/
 	public void setXY(int x, int y){
 		this.posicion.setLocation(x, y);
 	}
+	/**
+	 * Asigna posicion (x,y) a la cajita de estadisticas
+	 * @param x Posicion x
+	 * @param y Posicion y
+	 * **/
 	public void setStatXY(int x, int y){
 		this.statBox.setLocation(x, y);
 	}
+	/**
+	 * Crea el componente JTable con datos de los vehiculos considerado en la simulacion
+	 * @param vehiculos Lista de vehiculos a extraer datos
+	 * @param longitudPista Distancia de pista en m
+	 * **/
 	public static JTable getTableData(ArrayList<Vehiculo> vehiculos, int longitudPista){
 		int size = vehiculos.size();
 		String [][] rowData = new String [6][size + 1];
@@ -165,9 +184,8 @@ public class Vehiculo implements Dibujable{
 		Iterator<Vehiculo> it = vehiculos.iterator();
 		for (int i = 1; i <= size; i ++){ // iterar por vehiculo / columna
 			Vehiculo v = it.next();
-			// recorrero por fila
-			// rowData[0][i] = v.marca;
 			columnNames[i] = v.marca;
+			// recorrero por fila, de columna i
 			rowData[0][i] = String.format("%.5f m/s^2", v.axCTE);
 			rowData[1][i] = (longitudPista < v.x200)?"N/A":String.format("%.5f m", v.x200);
 			rowData[2][i] = String.format("%.5f m/s", v.vf);
@@ -177,9 +195,11 @@ public class Vehiculo implements Dibujable{
 		}
 		return new JTable(rowData, columnNames);
 	}
-	@Override
+	/**
+	 * Operacion de dibujo de vehiculo y cajita de estadisticas
+	 * @param g2d Objeto Graphics2D a dibujar
+	 * **/
 	public void dibujar(Graphics2D g2d) {
-		// g2d.drawImage(vehiculoImage, posicion.x - vehiculoImage.getWidth()/2, posicion.y - vehiculoImage.getHeight()/2, 60, 60, null);
 		g2d.drawImage(vehiculoImage, posicion.x, posicion.y, 60, 60, null);
 		// dibujar cuadro de estadisticas
 		g2d.drawRect(statBox.x, statBox.y, 210, 80);
@@ -189,7 +209,6 @@ public class Vehiculo implements Dibujable{
 		g2d.drawString(String.format("Distancia: %.5f m", x), statBox.x + 10, statBox.y + 30);
 		g2d.drawString(String.format("Tiempo: %.3f s", t), statBox.x + 10, statBox.y + 45);
 		g2d.drawString(String.format("Velocidad: %.5f m/s", vf), statBox.x + 10, statBox.y + 60);
-		// si ha concluido, dibujar tiempo transcurrido
 	}
 
 }

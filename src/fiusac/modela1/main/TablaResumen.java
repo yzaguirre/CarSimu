@@ -13,12 +13,12 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 
 /**
- * @author david
- *
+ * Contiene tabla de datos resumiendo la simulacion
  */
 public class TablaResumen extends JFrame {
 	/**
-	 * @param title
+	 * @param title Titulo del JFrame
+	 * @param jtTabla Componente Tabla con datos
 	 */
 	public TablaResumen(String title, JTable jtTabla) {
 		super(title);
@@ -27,6 +27,9 @@ public class TablaResumen extends JFrame {
 		JScrollPane jsp = new JScrollPane(jtTabla);
 		getContentPane().add(jsp, BorderLayout.CENTER);
 	}
+	/**
+	 * Muestra la ventana
+	 **/
 	public void mostrar(){
 		setVisible(true);
 	}
